@@ -154,8 +154,11 @@ const Login = () => {
                         sx={addStyleToTextField(password)}
                     />
 
-                    <Button variant="contained" sx={{ backgroundColor: ' #4A90E2', color: 'white' }} fullWidth onClick={login}>
+                    <Button variant="contained" sx={{ backgroundColor: ' #4A90E2', color: 'white', mb: 1, mt: 1 }} fullWidth onClick={login}>
                         {'login'}
+                    </Button>
+                    <Button variant="outlined" sx={{ color: ' #4A90E2', borderColor: ' #4A90E2' }} fullWidth onClick={() => navigate('/auth/register')}>
+                        {'Inregistreaza-te'}
                     </Button>
                 </Box>
             </div>

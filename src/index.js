@@ -20,7 +20,7 @@ const App = () => {
         <Routes>
           <Route path="/dashboard/*" element={<Dashboard />} />
           <Route path="/auth/*" element={<Auth />} />
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/auth" replace />} />
         </Routes>
       </BrowserRouter>
     </ThemeProvider>

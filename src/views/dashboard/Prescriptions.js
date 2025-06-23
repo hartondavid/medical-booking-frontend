@@ -92,16 +92,18 @@ const Prescriptions = ({ userRights }) => {
 
     const handleAddPrescriptionRequest = () => {
         // Construiește un obiect FormData pentru upload fișier
-        const formDataToSend = new FormData();
-        formDataToSend.append('file', formData.file_path); // file_path conține obiectul File
-        formDataToSend.append('patient_id', 2 || '');
+        // const formDataToSend = new FormData();
+        // formDataToSend.append('file', formData.file_path); // file_path conține obiectul File
+        // formDataToSend.append('patient_id', 2 || '');
 
         apiAddPrescription((response) => {
             showSuccessToast(response.message);
             setOpenAddPrescriptionDialog(false);
 
-            const updatedData = data.filter((reservation) => reservation.id !== prescriptionToAdd);
-            setData(updatedData);
+            apiGetPrescriptionsByDoctorId((response) => {
+                setData(response.data);
+                console.log('prescriptii doctor', response.data);
+            }, showErrorToast);
         }, showErrorToast, { file: formData.file_path, patient_id: formData.patient_id });
     };
 
@@ -178,7 +180,7 @@ const Prescriptions = ({ userRights }) => {
                 title={"Retete"}
                 columns={columns}
                 data={data}
-                buttonText={rightCode === RIGHTS_MAPPING.DOCTOR && "Adauga prescriptie"}
+                buttonText={rightCode === RIGHTS_MAPPING.DOCTOR && "Adauga reteta"}
                 buttonAction={() => {
                     handleOpenAddPrescriptionDialog();
                 }}

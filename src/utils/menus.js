@@ -4,6 +4,7 @@ import PeopleAltIcon from '@mui/icons-material/PeopleAlt';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import ReceiptLongIcon from '@mui/icons-material/ReceiptLong';
 import HistoryIcon from '@mui/icons-material/History';
+import ReviewsIcon from '@mui/icons-material/Reviews';
 
 export const menus = [
 
@@ -77,5 +78,18 @@ export const menus = [
         children: [
         ]
     },
+    {
+        id: 6,
+        parentId: null,
+        name: "Recenzii",
+        to: "/dashboard/reviews",
+        icon: ReviewsIcon,
+        isCategory: false,
+        excludelocationsType: [],
+        rights: [RIGHTS_MAPPING.DOCTOR],
+        order: 90,
+        children: [
+        ]
+    }
 
 ]
