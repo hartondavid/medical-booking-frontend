@@ -244,9 +244,9 @@ const Reservations = ({ userRights }) => {
 
                         }}
                         onClick={() => {
-                            if (rightCode === RIGHTS_MAPPING.DOCTOR) {
-                                handleOpenChangeStatusDialog(row.id)
-                            }
+
+                            handleOpenChangeStatusDialog(row.id)
+
                         }}
 
                     />
@@ -289,10 +289,10 @@ const Reservations = ({ userRights }) => {
                                 onChange={handleChange}
 
                             >
-                                <MenuItem value={'pending'}>In asteptare</MenuItem>
-                                <MenuItem value={'confirmed'}>Confirmata</MenuItem>
-                                <MenuItem value={'rejected'}>Respinsa</MenuItem>
-                                <MenuItem value={'finished'}>Finalizata</MenuItem>
+                                {<MenuItem value={'pending'}>In asteptare</MenuItem>}
+                                {rightCode === RIGHTS_MAPPING.DOCTOR && <MenuItem value={'confirmed'}>Confirmata</MenuItem>}
+                                {(rightCode === RIGHTS_MAPPING.DOCTOR || rightCode === RIGHTS_MAPPING.PATIENT) && <MenuItem value={'rejected'}>Respinsa</MenuItem>}
+                                {rightCode === RIGHTS_MAPPING.DOCTOR && <MenuItem value={'finished'}>Finalizata</MenuItem>}
 
 
                             </Select>
