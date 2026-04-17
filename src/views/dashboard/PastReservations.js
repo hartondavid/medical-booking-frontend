@@ -5,7 +5,7 @@ import { showErrorToast, showSuccessToast } from "../../utils/utilFunctions";
 import { Chip } from "@mui/material";
 import { apiGetPastReservationsByDoctorId, apiGetPastReservationsByPatientId } from "../../api/reservations";
 import { RIGHTS_MAPPING } from "../../utils/utilConstants";
-import dayjs from 'dayjs';
+import { formatReservationDateTime } from "../../utils/utilFunctions";
 
 const colorMap = {
     pending: 'orange',
@@ -56,7 +56,7 @@ const columns = [
     },
     {
         field: 'date', headerName: 'Data si ora', type: 'date', renderCell: ({ value }) => {
-            return dayjs(value).format('DD.MM.YYYY HH:mm');
+            return formatReservationDateTime(value);
         }
     },
 

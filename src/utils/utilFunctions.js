@@ -70,6 +70,23 @@ export const formatCurrency = (amount) => {
     }).format(amount);
 }
 
+/**
+ * Displays reservation date in local timezone (UI) consistently.
+ */
+export const formatReservationDateTime = (value) => {
+    if (!value) return '';
+    const text = String(value).trim();
+
+    // Keep exact clock time from backend string (no timezone conversion in UI).
+    const match = text.match(/^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+    if (match) {
+        const [, year, month, day, hours, minutes] = match;
+        return `${day}.${month}.${year} ${hours}:${minutes}`;
+    }
+
+    return text;
+}
+
 export const addStyleToTextField = (hasValue) => {
     return {
         '& .MuiInputLabel-root': {

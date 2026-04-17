@@ -1,9 +1,36 @@
 import { Box, Button, TextField, Typography } from "@mui/material";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { showErrorToast, showSuccessToast } from "../../utils/utilFunctions";
 import { apiAddReservation } from "../../api/reservations";
 import { addStyleToTextField } from "../../utils/utilFunctions";
+
+const SLOT_MINUTES = 30;
+const SLOT_STEP_SECONDS = SLOT_MINUTES * 60;
+
+/** Următorul moment permis (rotunjit la 30 min), pentru atributul min pe datetime-local */
+function nextAllowedDatetimeLocal() {
+    const d = new Date();
+    d.setSeconds(0, 0);
+    let m = d.getMinutes();
+    const r = m % SLOT_MINUTES;
+    if (r !== 0) {
+        d.setMinutes(m + (SLOT_MINUTES - r));
+    }
+    const off = d.getTimezoneOffset();
+    const local = new Date(d.getTime() - off * 60 * 1000);
+    return local.toISOString().slice(0, 16);
+}
+
+/** Valoarea din input type=datetime-local este interpretată în timezone local */
+function isLocalHalfHourSlot(datetimeLocalValue) {
+    if (!datetimeLocalValue) return false;
+    const d = new Date(datetimeLocalValue);
+    if (Number.isNaN(d.getTime())) return false;
+    if (d.getSeconds() !== 0 || d.getMilliseconds() !== 0) return false;
+    const min = d.getMinutes();
+    return min === 0 || min === 30;
+}
 
 const AddReservation = ({ userRights }) => {
     const navigate = useNavigate(); // Initialize navigate function
@@ -16,9 +43,12 @@ const AddReservation = ({ userRights }) => {
     const { doctorId } = useParams();
 
     const currDate = new Date();
-    currDate.setSeconds(0);
-    currDate.setMilliseconds(0);
-    currDate.setMinutes(0);
+    currDate.setSeconds(0, 0);
+    let cm = currDate.getMinutes();
+    const cr = cm % SLOT_MINUTES;
+    if (cr !== 0) {
+        currDate.setMinutes(cm + (SLOT_MINUTES - cr));
+    }
 
     const toDatetimeLocal = (date) => {
         if (!date) return '';
@@ -59,19 +89,19 @@ const AddReservation = ({ userRights }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        if (!isLocalHalfHourSlot(formData.date)) {
+            showErrorToast('Alegeți o oră la intervale de 30 de minute (ex. 10:00, 10:30).');
+            return;
+        }
 
-        // Convert local datetime-local input to UTC ISO string
-        const toUTCISOString = (localDateString) => {
-            if (!localDateString) return null;
-            // localDateString is in 'yyyy-MM-ddTHH:mm' format
-            const local = new Date(localDateString);
-            return local.toISOString(); // always UTC
-        };
-
-        console.log('formData', formData);
+        const chosen = new Date(formData.date);
+        if (chosen < new Date()) {
+            showErrorToast('Data și ora trebuie să fie în viitor.');
+            return;
+        }
 
         apiAddReservation((response) => { navigate(`/dashboard/reservations`); showSuccessToast(response.message) },
-            showErrorToast, doctorId, toUTCISOString(formData.date), formData.subject, formData.description)
+            showErrorToast, doctorId, formData.date, formData.subject, formData.description)
 
 
     };
@@ -109,7 +139,8 @@ const AddReservation = ({ userRights }) => {
                             InputLabelProps={{ shrink: true }}
                             style={{ marginTop: '1rem' }}
                             inputProps={{
-                                min: new Date().toISOString().slice(0, 16),
+                                min: nextAllowedDatetimeLocal(),
+                                step: SLOT_STEP_SECONDS,
                             }}
                             sx={addStyleToTextField(formData.date)}
 

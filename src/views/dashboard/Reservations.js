@@ -6,7 +6,7 @@ import { Chip, Dialog, DialogTitle, DialogContent, DialogActions, Button, FormCo
 import { apiGetReservationsByDoctorId, apiGetReservationsByPatientId, apiUpdateReservationStatus, apiDeleteReservation } from "../../api/reservations";
 import { RIGHTS_MAPPING } from "../../utils/utilConstants";
 import dayjs from 'dayjs';
-import { addStyleToTextField } from "../../utils/utilFunctions";
+import { addStyleToTextField, formatReservationDateTime } from "../../utils/utilFunctions";
 import ChangeCircleIcon from '@mui/icons-material/ChangeCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
@@ -255,7 +255,7 @@ const Reservations = ({ userRights }) => {
         },
         {
             field: 'date', headerName: 'Data si ora', type: 'date', renderCell: ({ value }) => {
-                return dayjs(value).format('DD.MM.YYYY HH:mm');
+                return formatReservationDateTime(value);
             }
         },
 

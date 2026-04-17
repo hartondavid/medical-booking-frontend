@@ -4,6 +4,9 @@ import {
     TextField,
     Button,
     Box,
+    Paper,
+    IconButton,
+    CircularProgress,
 } from '@mui/material';
 import { useState } from 'react';
 
@@ -15,6 +18,9 @@ import { showSuccessToast } from '../utils/utilFunctions';
 import './login.css';
 import bgImage from "../../src/assets/login-bg.jpg";
 import { addStyleToTextField } from '../utils/utilFunctions';
+import { askClinicAssistant } from '../api/assistant';
+import CloseIcon from '@mui/icons-material/Close';
+import ChatIcon from '@mui/icons-material/Chat';
 
 const Login = () => {
     const navigate = useNavigate(); // Initialize navigate function
@@ -25,6 +31,15 @@ const Login = () => {
         email: '',
         password: '',
     });
+    const [assistantOpen, setAssistantOpen] = useState(false);
+    const [assistantInput, setAssistantInput] = useState('');
+    const [assistantLoading, setAssistantLoading] = useState(false);
+    const [assistantMessages, setAssistantMessages] = useState([
+        {
+            role: 'assistant',
+            text: 'Buna ziua! Cu ce te pot ajuta? Intreaba-ma orice.'
+        }
+    ]);
 
     // Validate form fields
     const validateForm = () => {
@@ -117,6 +132,41 @@ const Login = () => {
         }
     };
 
+    const sendAssistantMessage = async () => {
+        const question = assistantInput.trim();
+        if (!question || assistantLoading) {
+            return;
+        }
+
+        setAssistantInput('');
+        setAssistantLoading(true);
+        setAssistantMessages((prev) => [...prev, { role: 'user', text: question }]);
+
+        try {
+            const response = await askClinicAssistant(question);
+            const assistantText = response.availabilitySummary
+                ? `${response.reply}\n\n${response.availabilitySummary}`
+                : response.reply;
+            setAssistantMessages((prev) => [...prev, { role: 'assistant', text: assistantText }]);
+        } catch (error) {
+            setAssistantMessages((prev) => [
+                ...prev,
+                {
+                    role: 'assistant',
+                    text: error.message || 'I am currently unavailable. Please try again.'
+                }
+            ]);
+        } finally {
+            setAssistantLoading(false);
+        }
+    };
+
+    const handleAssistantKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            sendAssistantMessage();
+        }
+    };
+
     return (
         <>
             <div
@@ -161,6 +211,85 @@ const Login = () => {
                         {'Inregistreaza-te'}
                     </Button>
                 </Box>
+
+                {assistantOpen && (
+                    <Paper elevation={6} sx={{
+                        position: 'fixed',
+                        right: 24,
+                        bottom: 88,
+                        width: 360,
+                        maxWidth: 'calc(100vw - 24px)',
+                        p: 2,
+                        borderRadius: 2,
+                        zIndex: 1400
+                    }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                            <Typography variant="h6">Clinic Assistant</Typography>
+                            <IconButton size="small" onClick={() => setAssistantOpen(false)}>
+                                <CloseIcon fontSize="small" />
+                            </IconButton>
+                        </Box>
+
+                        <Box sx={{ maxHeight: 280, overflowY: 'auto', mb: 1, pr: 0.5 }}>
+                            {assistantMessages.map((message, index) => (
+                                <Box
+                                    key={`${message.role}-${index}`}
+                                    sx={{
+                                        mb: 1,
+                                        p: 1,
+                                        borderRadius: 1,
+                                        backgroundColor: message.role === 'user' ? '#E3F2FD' : '#F5F5F5',
+                                        whiteSpace: 'pre-wrap'
+                                    }}
+                                >
+                                    <Typography variant="body2">{message.text}</Typography>
+                                </Box>
+                            ))}
+                            {assistantLoading && (
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, p: 1 }}>
+                                    <CircularProgress size={16} />
+                                    <Typography variant="body2">Thinking...</Typography>
+                                </Box>
+                            )}
+                        </Box>
+
+                        <TextField
+                            fullWidth
+                            size="small"
+                            placeholder="Intreaba-ma orice..."
+                            value={assistantInput}
+                            onChange={(e) => setAssistantInput(e.target.value)}
+                            onKeyDown={handleAssistantKeyDown}
+                            disabled={assistantLoading}
+                        />
+                        <Button
+                            variant="contained"
+                            fullWidth
+                            sx={{ mt: 1, backgroundColor: '#4A90E2', color: 'white' }}
+                            disabled={assistantLoading || !assistantInput.trim()}
+                            onClick={sendAssistantMessage}
+                        >
+                            Trimite
+                        </Button>
+                    </Paper>
+                )}
+
+                <Button
+                    variant="contained"
+                    onClick={() => setAssistantOpen((prev) => !prev)}
+                    startIcon={<ChatIcon />}
+                    sx={{
+                        position: 'fixed',
+                        right: 24,
+                        bottom: 24,
+                        borderRadius: '999px',
+                        backgroundColor: '#4A90E2',
+                        zIndex: 1400,
+                        color: 'white'
+                    }}
+                >
+                    AI Chat
+                </Button>
             </div>
 
         </>
