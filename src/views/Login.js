@@ -144,9 +144,8 @@ const Login = () => {
 
         try {
             const response = await askClinicAssistant(question);
-            const assistantText = response.availabilitySummary
-                ? `${response.reply}\n\n${response.availabilitySummary}`
-                : response.reply;
+            const parts = [response.reply, response.availabilitySummary, response.bookingCtaFooter].filter(Boolean);
+            const assistantText = parts.join('\n\n');
             setAssistantMessages((prev) => [...prev, { role: 'assistant', text: assistantText }]);
         } catch (error) {
             setAssistantMessages((prev) => [
@@ -174,12 +173,34 @@ const Login = () => {
                 style={{ backgroundImage: `url(${bgImage})` }}
             >
                 {/* <Navbar /> */}
-                <Box component="form" noValidate autoComplete="off"
-                    onKeyDown={handleKeyPress} sx={{
-                        width: '20%', margin: 'auto',
-                        marginTop: '100px', backgroundColor: 'white', padding: '20px', borderRadius: '10px'
-                    }}>
-                    <Typography variant="h3">Intra in cont</Typography>
+                <Box
+                    component="form"
+                    noValidate
+                    autoComplete="off"
+                    onKeyDown={handleKeyPress}
+                    sx={{
+                        width: '100%',
+                        maxWidth: { xs: 440, sm: 420, md: 400 },
+                        mx: 'auto',
+                        my: { xs: 0, sm: 2 },
+                        backgroundColor: 'white',
+                        px: { xs: 2, sm: 3 },
+                        py: { xs: 2.5, sm: 3 },
+                        borderRadius: 2,
+                        boxShadow: { xs: 2, sm: 3 },
+                    }}
+                >
+                    <Typography
+                        variant="h3"
+                        component="h1"
+                        sx={{
+                            fontSize: { xs: '1.65rem', sm: '2rem', md: '2.75rem' },
+                            lineHeight: 1.2,
+                            mb: 0.5,
+                        }}
+                    >
+                        Intra in cont
+                    </Typography>
                     <TextField
                         fullWidth
                         margin="normal"
@@ -213,24 +234,43 @@ const Login = () => {
                 </Box>
 
                 {assistantOpen && (
-                    <Paper elevation={6} sx={{
-                        position: 'fixed',
-                        right: 24,
-                        bottom: 88,
-                        width: 360,
-                        maxWidth: 'calc(100vw - 24px)',
-                        p: 2,
-                        borderRadius: 2,
-                        zIndex: 1400
-                    }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                            <Typography variant="h6">Clinic Assistant</Typography>
-                            <IconButton size="small" onClick={() => setAssistantOpen(false)}>
+                    <Paper
+                        elevation={6}
+                        sx={{
+                            position: 'fixed',
+                            left: { xs: 12, sm: 'auto' },
+                            right: { xs: 12, sm: 24 },
+                            bottom: { xs: 72, sm: 88 },
+                            width: { xs: 'auto', sm: 380 },
+                            maxWidth: { sm: 'min(380px, calc(100vw - 48px))' },
+                            maxHeight: { xs: 'min(520px, calc(100dvh - 100px))', sm: 'min(480px, calc(100dvh - 120px))' },
+                            p: { xs: 1.5, sm: 2 },
+                            borderRadius: 2,
+                            zIndex: 1400,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            overflow: 'hidden',
+                        }}
+                    >
+                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1, flexShrink: 0, gap: 1 }}>
+                            <Typography variant="h6" sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
+                                Clinic Assistant
+                            </Typography>
+                            <IconButton size="small" onClick={() => setAssistantOpen(false)} aria-label="Inchide asistentul">
                                 <CloseIcon fontSize="small" />
                             </IconButton>
                         </Box>
 
-                        <Box sx={{ maxHeight: 280, overflowY: 'auto', mb: 1, pr: 0.5 }}>
+                        <Box
+                            sx={{
+                                flex: '1 1 auto',
+                                minHeight: 0,
+                                overflowY: 'auto',
+                                mb: 1,
+                                pr: 0.5,
+                                WebkitOverflowScrolling: 'touch',
+                            }}
+                        >
                             {assistantMessages.map((message, index) => (
                                 <Box
                                     key={`${message.role}-${index}`}
@@ -239,7 +279,9 @@ const Login = () => {
                                         p: 1,
                                         borderRadius: 1,
                                         backgroundColor: message.role === 'user' ? '#E3F2FD' : '#F5F5F5',
-                                        whiteSpace: 'pre-wrap'
+                                        whiteSpace: 'pre-wrap',
+                                        wordBreak: 'break-word',
+                                        overflowWrap: 'anywhere',
                                     }}
                                 >
                                     <Typography variant="body2">{message.text}</Typography>
@@ -253,24 +295,26 @@ const Login = () => {
                             )}
                         </Box>
 
-                        <TextField
-                            fullWidth
-                            size="small"
-                            placeholder="Intreaba-ma orice..."
-                            value={assistantInput}
-                            onChange={(e) => setAssistantInput(e.target.value)}
-                            onKeyDown={handleAssistantKeyDown}
-                            disabled={assistantLoading}
-                        />
-                        <Button
-                            variant="contained"
-                            fullWidth
-                            sx={{ mt: 1, backgroundColor: '#4A90E2', color: 'white' }}
-                            disabled={assistantLoading || !assistantInput.trim()}
-                            onClick={sendAssistantMessage}
-                        >
-                            Trimite
-                        </Button>
+                        <Box sx={{ flexShrink: 0 }}>
+                            <TextField
+                                fullWidth
+                                size="small"
+                                placeholder="Intreaba-ma orice..."
+                                value={assistantInput}
+                                onChange={(e) => setAssistantInput(e.target.value)}
+                                onKeyDown={handleAssistantKeyDown}
+                                disabled={assistantLoading}
+                            />
+                            <Button
+                                variant="contained"
+                                fullWidth
+                                sx={{ mt: 1, backgroundColor: '#4A90E2', color: 'white' }}
+                                disabled={assistantLoading || !assistantInput.trim()}
+                                onClick={sendAssistantMessage}
+                            >
+                                Trimite
+                            </Button>
+                        </Box>
                     </Paper>
                 )}
 
@@ -278,17 +322,27 @@ const Login = () => {
                     variant="contained"
                     onClick={() => setAssistantOpen((prev) => !prev)}
                     startIcon={<ChatIcon />}
+                    aria-label={assistantOpen ? 'Inchide chat AI' : 'Deschide chat AI'}
                     sx={{
                         position: 'fixed',
-                        right: 24,
-                        bottom: 24,
+                        right: { xs: 12, sm: 24 },
+                        bottom: { xs: 12, sm: 24 },
                         borderRadius: '999px',
                         backgroundColor: '#4A90E2',
                         zIndex: 1400,
-                        color: 'white'
+                        color: 'white',
+                        minWidth: { xs: 48, sm: 64 },
+                        px: { xs: 1.25, sm: 2 },
+                        boxShadow: 3,
+                        '& .MuiButton-startIcon': {
+                            marginRight: { xs: 0, sm: 1 },
+                            marginLeft: { xs: 0, sm: -0.5 },
+                        },
                     }}
                 >
-                    AI Chat
+                    <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                        AI Chat
+                    </Box>
                 </Button>
             </div>
 
